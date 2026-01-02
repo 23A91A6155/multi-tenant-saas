@@ -1,47 +1,65 @@
-# Multi-Tenant SaaS Application
+🧩 Multi-Tenant SaaS Application
+A full-stack Multi-Tenant SaaS Application built with Node.js, Express, PostgreSQL, React, and Docker, implementing secure authentication, role-based access control, tenant isolation, and project/task management.
+This project is developed as per company/mentor requirements and is fully functional in both local development and Dockerized environments.
+📌 Key Features
+🔐 Authentication & Authorization
+JWT-based authentication
+Secure password hashing using bcrypt
+Role-based access control:
+Super Admin
+Tenant Admin
+User
+🏢 Multi-Tenancy
+Each tenant has isolated data
+Users, projects, and tasks are strictly scoped to their tenant
+Subdomain-based tenant login
+👥 User Management
+Tenant Admin can:
+Add users
+View users
+Delete users
+Role enforcement at API & UI level
+📁 Project Management
+Create projects per tenant
+List projects
+Delete projects
+Dashboard shows total projects count
+✅ Task Management
+Create tasks under a project
+View tasks per project
+Update task status
+Delete tasks
+🖥️ Frontend (React)
+Login & Register pages
+Protected routes
+Dashboard with summary cards
+Projects page
+Users page with Add / Delete
+Navbar with logout
+Token-based API calls
+🐳 Docker Support
+Database (PostgreSQL)
+Backend (Node + Express)
+Frontend (React)
+All services run using docker-compose
+🛠️ Tech Stack
+Backend
+Node.js
+Express.js
+PostgreSQL
+JWT
+bcryptjs
+pg (node-postgres)
+Frontend
+React (Vite)
+React Router DOM
+Axios
+DevOps
+Docker
+Docker Compose
+📂 Project Structure
+Copy code
 
-A complete backend + frontend multi-tenant SaaS system built using Node.js, Express, PostgreSQL, React, and Docker.
-
----
-
-## 🚀 Features
-
-- Multi-tenant architecture (strict tenant isolation)
-- JWT-based authentication & authorization
-- Role-based access control (super_admin, tenant_admin, user)
-- Tenant management
-- User management per tenant
-- Project & task management
-- Dockerized backend, database, and frontend
-- RESTful API (19 endpoints)
-
----
-
-## 🛠 Tech Stack
-
-### Backend
-- Node.js
-- Express.js
-- PostgreSQL
-- JWT Authentication
-- bcrypt / bcryptjs
-- Docker
-
-### Frontend
-- React (Vite)
-- Axios
-- React Router
-- Docker
-
-### Database
-- PostgreSQL 15
-- UUID-based primary keys
-
----
-
-## 🧱 Project Structure
-
-```text
 multi-tenant-saas/
 │
 ├── backend/
@@ -50,194 +68,130 @@ multi-tenant-saas/
 │   │   ├── routes/
 │   │   ├── middleware/
 │   │   ├── config/
-│   │   └── app.js
+│   │   └── utils/
 │   ├── server.js
-│   ├── Dockerfile
-│   └── .env
+│   └── package.json
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── auth/
 │   │   ├── pages/
 │   │   ├── components/
-│   │   └── api/
-│   ├── Dockerfile
-│   └── vite.config.js
+│   │   ├── api/
+│   │   └── App.jsx
+│   └── package.json
 │
 ├── database/
 │   ├── migrations/
 │   └── seeds/
 │
 ├── docker-compose.yml
-├── submission.json
-└── docs/
-🐳 Docker Setup (MANDATORY)
-Run entire system
-| Service  | Port |
-| -------- | ---- |
-| Database | 5432 |
-| Backend  | 5000 |
-| Frontend | 3000 |
-❤️ Health Check
-GET api/health
-{ "status": "OK" }
-🔐 Authentication Flow
+└── README.md
+🚀 How to Run (Local – Without Docker)
+1️⃣ Start Database
+Use PostgreSQL via Docker or local installation.
+2️⃣ Backend
+Copy code
+Bash
+cd backend
+npm install
+npm run dev
+Backend runs on:
+Copy code
 
-Tenant Registration
+http://localhost:5000
+Health check:
+Copy code
 
-Tenant Admin Login
+GET /health
+3️⃣ Frontend
+Copy code
+Bash
+cd frontend
+npm install
+npm run dev
+Frontend runs on:
+Copy code
 
-JWT issued
+http://localhost:5173
+🐳 How to Run (Docker – Recommended)
+From project root:
+Copy code
+Bash
+docker compose up -d
+Ports
+Service
+Port
+Database
+5432
+Backend
+5000
+Frontend
+3000
+🔑 Test Credentials (Seed Data)
+Tenant Admin
+Copy code
 
-Token used in Authorization header
+Email: admin@companyone.com
+Password: Test@123
+Subdomain: companyone
+Role: tenant_admin
+Regular User
+Copy code
 
-Role & tenant validated on every request
+Email: user@companyone.com
+Password: User@123
+Subdomain: companyone
+Role: user
+🔗 API Endpoints (Major)
+Auth
+POST /api/auth/login
+GET /api/auth/me
+POST /api/auth/logout
+Tenants
+GET /api/tenants/:tenantId
+PUT /api/tenants/:tenantId
+GET /api/tenants
+Users
+GET /api/tenants/:tenantId/users
+POST /api/tenants/:tenantId/users
+DELETE /api/users/:userId
+Projects
+POST /api/projects
+GET /api/projects
+DELETE /api/projects/:id
+Tasks
+POST /api/projects/:id/tasks
+GET /api/projects/:id/tasks
+PUT /api/tasks/:id
+DELETE /api/tasks/:id
+🔒 Security Practices
+Password hashing with bcrypt
+JWT expiration handling
+Tenant isolation enforced at query level
+Role validation middleware
+Protected frontend routes
+🧪 Testing
+APIs tested via Postman
+Frontend tested manually
+Role-based access verified
+Cross-tenant access blocked
+📊 Evaluation Notes (For Mentor)
+✔ Multi-tenant isolation implemented
+✔ Role-based access control
+✔ Secure authentication
+✔ RESTful API design
+✔ Dockerized services
+✔ Clean project structure
+✔ Frontend & backend fully integrated
+📽️ Demo & Submission
+Demo video can be recorded showing:
+Login
+User creation
+Project creation
+Task creation
+Tenant isolation
 👨‍💻 Author
-
-Name: Your Name
-
-College / Company
-
-Date: 2025
-
----
-
-## 2️⃣ docs/architecture.md
-
-Create file:
-
-```md
-# System Architecture
-
-## Overview
-
-The application follows a 3-tier architecture:
-
-1. Frontend (React)
-2. Backend API (Node.js + Express)
-3. Database (PostgreSQL)
-
-All services are containerized using Docker and communicate over a Docker network.
-
----
-
-## High-Level Flow
-
-User → Frontend → Backend API → Database
-
----
-
-## Multi-Tenancy Strategy
-
-- Every request contains a JWT
-- JWT includes `tenantId` and `role`
-- Backend enforces tenant isolation at query level
-- Cross-tenant access is blocked
-
----
-
-## Database ERD (Textual)
-
-- tenants
-- users (tenant_id FK)
-- projects (tenant_id FK)
-- tasks (project_id FK)
-
----
-
-## Security
-
-- Password hashing using bcrypt
-- JWT expiration
-- Role-based authorization
-- SQL injection prevention via parameterized queries
-3️⃣ docs/API.md (19 APIs LIST)
-
-Create:
-
-# API Documentation
-
-## Authentication
-1. POST /api/auth/register-tenant
-2. POST /api/auth/login
-3. GET  /api/auth/me
-4. POST /api/auth/logout
-
-## Tenant
-5. GET    /api/tenants/:id
-6. PUT    /api/tenants/:id
-7. GET    /api/tenants
-
-## Users
-8. POST   /api/tenants/:id/users
-9. GET    /api/tenants/:id/users
-10. PUT   /api/users/:id
-11. DELETE /api/users/:id
-
-## Projects
-12. POST   /api/projects
-13. GET    /api/projects
-14. PUT    /api/projects/:id
-15. DELETE /api/projects/:id
-
-## Tasks
-16. POST   /api/projects/:id/tasks
-17. GET    /api/projects/:id/tasks
-18. PUT    /api/tasks/:id
-19. DELETE /api/tasks/:id
-4️⃣ submission.json (MANDATORY)
-
-Create in root folder:
-{
-  "testCredentials": {
-    "superAdmin": {
-      "email": "superadmin@system.com",
-      "password": "Admin@123"
-    },
-    "tenantAdmin": {
-      "email": "admin@companyone.com",
-      "password": "Admin@123",
-      "tenantSubdomain": "companyone"
-    },
-    "user": {
-      "email": "user1@companyone.com",
-      "password": "User@123"
-    }
-  }
-}
-5️⃣ docs/technical-spec.md
-# Technical Specification
-
-## Backend
-- Express.js REST API
-- JWT middleware
-- PostgreSQL connection pool
-- Transaction-safe queries
-
-## Frontend
-- React + Vite
-- Axios API client
-- Protected routes
-- Role-based UI rendering
-
-## Docker
-- Multi-container setup
-- Automatic DB startup
-- Fixed ports as per requirement
-6️⃣ docs/research.md (SUMMARY VERSION)
-# Multi-Tenancy Research
-
-Multi-tenancy allows a single application instance to serve multiple customers while keeping data isolated.
-
-### Benefits
-- Cost efficiency
-- Scalability
-- Centralized maintenance
-
-### Security Considerations
-- Tenant-aware queries
-- JWT validation
-- Role enforcement
-
-### Architecture Choice
-Chosen for simplicity, scalability, and Docker compatibility.
+Project Developed By:
+[P.Akhila]
+Multi-Tenant SaaS Full Stack Project

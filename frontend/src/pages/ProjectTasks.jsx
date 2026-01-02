@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+/*import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/api";
 import Navbar from "../components/Navbar";
@@ -42,4 +42,42 @@ export default function ProjectTasks() {
       </div>
     </>
   );
+}*/
+
+
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import api from "../api/api";
+import Navbar from "../components/Navbar";
+
+export default function Projects() {
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    api.get("/projects").then((res) => {
+      setProjects(res.data.data || []);
+    });
+  }, []);
+
+  return (
+    <>
+      <Navbar />
+      <h2>Projects</h2>
+
+      {projects.length === 0 && <p>No projects found</p>}
+
+      <ul>
+        {projects.map((project) => (
+          <li key={project.id} style={{ marginBottom: 10 }}>
+            <strong>{project.name}</strong>
+            <br />
+            <Link to={`/projects/${project.id}/tasks`}>
+              View Tasks
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
 }
+

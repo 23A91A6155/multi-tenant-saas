@@ -1,43 +1,59 @@
 import { useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import api from "../api/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [tenantSubdomain, setTenantSubdomain] = useState("");
-  const [message, setMessage] = useState("");
-
+  const [subdomain, setSubdomain] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await api.post("/auth/login", {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
-        tenantSubdomain
+        subdomain,
       });
 
-      localStorage.setItem("token", res.data.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.data.user));
+      // ✅ SAVE EVERYTHING
       localStorage.setItem("token", res.data.data.token);
       localStorage.setItem("tenantId", res.data.data.user.tenantId);
+      localStorage.setItem("role", res.data.data.user.role);
+
 
       navigate("/dashboard");
     } catch (err) {
-      setMessage("Invalid credentials");
+      alert("Invalid credentials");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleLogin}>
       <h2>Login</h2>
-      <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
-      <input placeholder="Password" type="password" onChange={e => setPassword(e.target.value)} />
-      <input placeholder="Tenant Subdomain" onChange={e => setTenantSubdomain(e.target.value)} />
-      <button>Login</button>
-      <p>{message}</p>
+
+      <input
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <input
+        placeholder="Subdomain"
+        value={subdomain}
+        onChange={(e) => setSubdomain(e.target.value)}
+      />
+
+      <button type="submit">Login</button>
     </form>
   );
 }

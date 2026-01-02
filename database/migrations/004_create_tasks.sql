@@ -1,4 +1,4 @@
-CREATE TABLE tasks (
+/*CREATE TABLE tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
   tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
@@ -10,4 +10,13 @@ CREATE TABLE tasks (
   due_date DATE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);*/
+
+CREATE TABLE tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  status VARCHAR(50) DEFAULT 'todo',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+

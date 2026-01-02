@@ -33,55 +33,43 @@ exports.registerTenant = async (req, res) => {
  */
 const pool = require("../config/db");
 
-
 exports.login = async (req, res) => {
   try {
-    const { email, password, tenantSubdomain } = req.body;
+    const { email, password, subdomain } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !subdomain) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email, password and subdomain are required"
       });
     }
 
-    let userResult;
+    const result = await pool.query(
+      `
+      SELECT 
+        u.id,
+        u.email,
+        u.password,
+        u.role,
+        u.tenant_id,
+        t.subdomain
+      FROM users u
+      JOIN tenants t ON u.tenant_id = t.id
+      WHERE u.email = $1 AND t.subdomain = $2
+      `,
+      [email, subdomain]
+    );
 
-    // 🔑 SUPER ADMIN LOGIN (NO TENANT)
-    if (!tenantSubdomain) {
-      userResult = await pool.query(
-        `
-        SELECT id, email, password, role
-        FROM users
-        WHERE email = $1 AND role = 'super_admin'
-        `,
-        [email]
-      );
-    }
-    // 🔑 TENANT USER LOGIN
-    else {
-      userResult = await pool.query(
-        `
-        SELECT u.id, u.email, u.password, u.role, u.tenant_id
-        FROM users u
-        JOIN tenants t ON u.tenant_id = t.id
-        WHERE u.email = $1 AND t.subdomain = $2
-        `,
-        [email, tenantSubdomain]
-      );
-    }
-
-    if (userResult.rowCount === 0) {
+    if (result.rowCount === 0) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials"
       });
     }
 
-    const user = userResult.rows[0];
+    const user = result.rows[0];
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -90,33 +78,36 @@ exports.login = async (req, res) => {
     }
 
     const token = generateToken({
-      userId: user.id,
-      role: user.role,
-      tenantId: user.tenant_id || null
-    });
+  userId: user.id,
+  email: user.email,
+  role: user.role,
+  tenantId: user.tenant_id
+});
 
     return res.json({
       success: true,
+      message: "Login successful",
       data: {
+        token,
         user: {
           id: user.id,
           email: user.email,
           role: user.role,
-          tenantId: user.tenant_id || null
-        },
-        token,
-        expiresIn: 86400
+          tenantId: user.tenant_id,
+          subdomain: user.subdomain
+        }
       }
     });
 
-  } catch (error) {
-    console.error("LOGIN ERROR:", error);
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Server error"
     });
   }
 };
+
 
 
 /**

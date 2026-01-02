@@ -1,34 +1,32 @@
-const pool = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
+const pool = require("../config/db");
 
 /**
- * API 16: Create Task
+ * CREATE TASK
  * POST /api/projects/:projectId/tasks
  */
 exports.createTask = async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { title, description, status = "todo" } = req.body;
+    const { title, status = "todo" } = req.body;
 
     if (!title) {
       return res.status(400).json({
         success: false,
-        message: "Title is required"
+        message: "Task title is required"
       });
     }
 
-    const taskId = uuidv4();
-
     const result = await pool.query(
       `
-      INSERT INTO tasks (id, project_id, title, description, status)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, project_id, title, description, status, created_at
+      INSERT INTO tasks (id, project_id, title, status)
+      VALUES (gen_random_uuid(), $1, $2, $3)
+      RETURNING id, title, status, project_id, created_at
       `,
-      [taskId, projectId, title, description || null, status]
+      [projectId, title, status]
     );
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Task created successfully",
       data: result.rows[0]
@@ -36,24 +34,23 @@ exports.createTask = async (req, res) => {
 
   } catch (err) {
     console.error("CREATE TASK ERROR:", err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Server error"
     });
   }
 };
-
 /**
- * API 17: List Tasks
+ * LIST TASKS BY PROJECT
  * GET /api/projects/:projectId/tasks
  */
-exports.listTasks = async (req, res) => {
+exports.getTasksByProject = async (req, res) => {
   try {
     const { projectId } = req.params;
 
     const result = await pool.query(
       `
-      SELECT id, title, description, status, created_at
+      SELECT *
       FROM tasks
       WHERE project_id = $1
       ORDER BY created_at DESC
@@ -61,14 +58,14 @@ exports.listTasks = async (req, res) => {
       [projectId]
     );
 
-    return res.json({
+    res.json({
       success: true,
       data: result.rows
     });
 
   } catch (err) {
     console.error("LIST TASKS ERROR:", err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Server error"
     });
@@ -76,7 +73,7 @@ exports.listTasks = async (req, res) => {
 };
 
 /**
- * API 18: Update Task
+ * UPDATE TASK
  * PUT /api/tasks/:taskId
  */
 exports.updateTask = async (req, res) => {
@@ -90,12 +87,11 @@ exports.updateTask = async (req, res) => {
       SET
         title = COALESCE($1, title),
         description = COALESCE($2, description),
-        status = COALESCE($3, status),
-        updated_at = NOW()
+        status = COALESCE($3, status)
       WHERE id = $4
-      RETURNING id, title, description, status, updated_at
+      RETURNING *
       `,
-      [title || null, description || null, status || null, taskId]
+      [title, description, status, taskId]
     );
 
     if (result.rowCount === 0) {
@@ -105,15 +101,14 @@ exports.updateTask = async (req, res) => {
       });
     }
 
-    return res.json({
+    res.json({
       success: true,
-      message: "Task updated successfully",
       data: result.rows[0]
     });
 
   } catch (err) {
     console.error("UPDATE TASK ERROR:", err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Server error"
     });
@@ -121,7 +116,7 @@ exports.updateTask = async (req, res) => {
 };
 
 /**
- * API 19: Delete Task
+ * DELETE TASK
  * DELETE /api/tasks/:taskId
  */
 exports.deleteTask = async (req, res) => {
@@ -129,11 +124,7 @@ exports.deleteTask = async (req, res) => {
     const { taskId } = req.params;
 
     const result = await pool.query(
-      `
-      DELETE FROM tasks
-      WHERE id = $1
-      RETURNING id
-      `,
+      `DELETE FROM tasks WHERE id = $1`,
       [taskId]
     );
 
@@ -144,14 +135,14 @@ exports.deleteTask = async (req, res) => {
       });
     }
 
-    return res.json({
+    res.json({
       success: true,
       message: "Task deleted successfully"
     });
 
   } catch (err) {
     console.error("DELETE TASK ERROR:", err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Server error"
     });

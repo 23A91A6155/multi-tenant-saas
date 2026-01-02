@@ -3,12 +3,14 @@ services:
     image: postgres:15
     container_name: database
     environment:
-      POSTGRES_DB: saas_db
+      POSTGRES_DB: multitenant
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
+      - ./database/migrations:/docker-entrypoint-initdb.d/1-migrations
+      - ./database/seeds:/docker-entrypoint-initdb.d/2-seeds
       - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -17,38 +19,29 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: ./backend
+    build: ./backend
     container_name: backend
     ports:
       - "5000:5000"
     environment:
       DB_HOST: database
       DB_PORT: 5432
-      DB_NAME: saas_db
+      DB_NAME: multitenant
       DB_USER: postgres
       DB_PASSWORD: postgres
-      JWT_SECRET: mysecretkey1234567890
+      JWT_SECRET: mysecretkey
       JWT_EXPIRES_IN: 24h
-      FRONTEND_URL: http://frontend:3000
     depends_on:
       database:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   frontend:
-    build:
-      context: ./frontend
+    build: ./frontend
     container_name: frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
 
 volumes:
   db_data:

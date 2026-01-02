@@ -1,22 +1,19 @@
--- SUPER ADMIN (platform level)
+-- SUPER ADMIN
 INSERT INTO users (id, email, password, full_name, role)
 VALUES (
   gen_random_uuid(),
-  'superadmin@platform.com',
-  'SuperAdmin@123',
+  'superadmin@system.com',
+  '$2b$10$C1zP8ZQ9QvJ4bC2m2n9v1uY0RZ5hQmWZ5Z7b2z2Y0qjz3k7jK8e9K',
   'Super Admin',
   'super_admin'
 );
 
 -- TENANT
-INSERT INTO tenants (id, name, subdomain, subscription_plan, max_users, max_projects)
+INSERT INTO tenants (id, name, subdomain)
 VALUES (
   gen_random_uuid(),
-  'Demo Tenant',
-  'demo',
-  'free',
-  5,
-  5
+  'Company One',
+  'companyone'
 );
 
 -- TENANT ADMIN
@@ -24,40 +21,8 @@ INSERT INTO users (id, tenant_id, email, password, full_name, role)
 SELECT
   gen_random_uuid(),
   id,
-  'admin@demo.com',
-  'Admin@123',
-  'Demo Admin',
+  'admin@companyone.com',
+  '$2b$10$C1zP8ZQ9QvJ4bC2m2n9v1uY0RZ5hQmWZ5Z7b2z2Y0qjz3k7jK8e9K',
+  'Company Admin',
   'tenant_admin'
-FROM tenants
-WHERE subdomain = 'demo';
-
--- REGULAR USER
-INSERT INTO users (id, tenant_id, email, password, full_name, role)
-SELECT
-  gen_random_uuid(),
-  id,
-  'user@demo.com',
-  'User@123',
-  'Demo User',
-  'user'
-FROM tenants
-WHERE subdomain = 'demo';
-
--- PROJECT
-INSERT INTO projects (id, tenant_id, name)
-SELECT
-  gen_random_uuid(),
-  id,
-  'Demo Project'
-FROM tenants
-WHERE subdomain = 'demo';
-
--- TASK
-INSERT INTO tasks (id, project_id, title, status)
-SELECT
-  gen_random_uuid(),
-  id,
-  'Initial Task',
-  'open'
-FROM projects
-LIMIT 1;
+FROM tenants WHERE subdomain='companyone';
